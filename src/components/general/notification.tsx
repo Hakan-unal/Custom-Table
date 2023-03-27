@@ -7,8 +7,8 @@ notification.config({
     placement: "topRight"
 });
 
-export const showNotification = (type:string, title:string, description:string, style) => {
-    notification[type]({
+export const showNotification = (type: any, title: string, description: string, style: any) => {
+    notification["success"]({
         message: title,
         description: description,
         className: 'custom-class',
