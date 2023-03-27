@@ -1,113 +1,126 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { withRouter } from "react-router-dom";
 import { connect } from "react-redux";
 import { setInlineRedux } from "../../redux/promodex/actions";
-import { Card, Row, Col, Button, Space, Image, Input, Table } from "antd"
-import { useLocalStorage } from "./useLocalStorage"
-import { AiFillGithub } from "react-icons/ai";
-import { SearchOutlined } from '@ant-design/icons';
+import { Select, Table, Row, Col, Button } from "antd"
+import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
+
+//  coming soon...
+
+//  localstorage 
+//  sorting
+//  search
+//  filter
+//  dynamic content
+//  dynamic columns
+
+//  only god knows.....
+
+const data = [
+  {
+    key: '1',
+    name: 'John Brown',
+    age: 32,
+    address: 'New York No. 1 Lake Park',
+  },
+  {
+    key: '2',
+    name: 'Joe Black',
+    age: 42,
+    address: 'London No. 1 Lake Park',
+  },
+  {
+    key: '3',
+    name: 'Jim Green',
+    age: 32,
+    address: 'Sydney No. 1 Lake Park',
+  },
+  {
+    key: '4',
+    name: 'Jim Red',
+    age: 32,
+    address: 'London No. 2 Lake Park',
+  },
+];
 
 
 
 const LandingPageContent = (props) => {
   const [loading, setLoading] = useState(true)
-  const [tableData, setTableData] = useState([])
-  const [searchValue, setSearchValue] = useState("pokemon")
-  const [hookTestData, setHookTestData] = useLocalStorage("movies", [])
-
-
-  const apikey = "3c67b397"
-
-
-
-  const handleGetData = () => {
-    fetch(" http://www.omdbapi.com/?s=pokemon&apikey=" + apikey)
-      .then(response => response.json())
-      .then(data => {
-        const tempArr = data.Search.map((movie, index) => {
-          return {
-            name: movie.Title,
-            year: movie.Year,
-            key: movie.imdbID,
-            image: movie.Poster
-          }
-        })
-        props.setInlineRedux({ data: tempArr })
-        setHookTestData(tempArr)
-        setTableData(tempArr)
-        setLoading(false)
-      });
-  }
-
-  const handleUniqueSearch = () => {
-    setLoading(true)
-
-    fetch(" http://www.omdbapi.com/?s=" + searchValue + "&apikey=" + apikey)
-      .then(response => response.json())
-      .then(data => {
-        const tempArr = data.Search.map((movie, index) => {
-          return {
-            name: movie.Title,
-            year: movie.Year,
-            key: movie.imdbID,
-            image: movie.Poster
-          }
-        })
-        props.setInlineRedux({ data: tempArr })
-        setHookTestData(tempArr)
-        setTableData(tempArr)
-        setSearchValue("")
-        setLoading(false)
-
-      });
-  }
-
-  useEffect(() => {
-
-    handleGetData()
-  }, [])
-
-
-
-
-  const columns = [
-    {
-      title: 'Poster',
-      dataIndex: 'image',
-      key: 'image',
-      render: image => <Image width={100} src={image} />,
-    },
+  const [staticTableColumns, setStaticTableColumns] = useState([
     {
       title: 'Name',
       dataIndex: 'name',
+      label: 'name',
       key: 'name',
+      value: 0,
+      width: '30%',
     },
     {
-      title: 'Year',
-      dataIndex: 'year',
-      key: 'year',
+      title: 'Age',
+      dataIndex: 'age',
+      key: 'age',
+      value: 1,
+      label: 'age',
     },
+    {
+      title: 'Address',
+      dataIndex: 'address',
+      key: 'address',
+      value: 2,
+      sorter: (a, b) => a.address.length - b.address.length,
+      sortDirections: ['descend', 'ascend'],
+      label: 'address',
+    },
+  ])
+  const [tableColumns, setTableColumns] = useState([])
+  const [isShowTableSorter, setIsShowTableSorter] = useState(true)
 
-  ];
 
 
-  return (
-    <>
-      <Row style={{ marginBottom: 50, marginTop: 50 }}>
-        <Col sm={8}>
-          <Input onChange={(event) => setSearchValue(event.target.value)} value={searchValue} size='large'></Input>
-        </Col>
-        <Col sm={{ span: 4, offset: 4 }}>
-          <Button onClick={() => handleUniqueSearch()} block size='large' icon={<SearchOutlined />} shape="round">Search</Button>
-        </Col>
-        <Col sm={{ span: 4, offset: 4 }}>
-          <Button onClick={() => window.open("https://github.com/Hakan-unal/invent-demo")} icon={<AiFillGithub size={20} />} shape="round" block size='large' >Source Code</Button>
-        </Col>
-      </Row>
-      <Table loading={loading} dataSource={tableData} columns={columns} />;
 
-    </>
-  );
+  const handleChange = (value) => {
+    const tempArr = []
+    console.log(value)
+    value.map((index) => tempArr.push(staticTableColumns[index]))
+
+    console.log(tempArr)
+    setTableColumns(tempArr)
+  };
+
+
+
+
+
+  useEffect(() => {
+    setTimeout(() => {
+      setLoading(!loading)
+    }, 50)
+  }, [])
+
+
+  return (<Row style={{ marginTop: 100 }}>
+    <Col sm={{ span: 14, offset: 4 }}>
+      {isShowTableSorter &&
+        <Select
+          placeholder="select table columns"
+          mode="tags"
+          style={{
+            width: '100%',
+          }}
+          onChange={handleChange}
+          tokenSeparators={[',']}
+          options={staticTableColumns}
+        />
+      }
+    </Col>
+    <Col sm={{ span: 2, offset: 0 }}>
+      <Button onClick={() => setIsShowTableSorter(!isShowTableSorter)} block type="dashed" shape="round" icon={isShowTableSorter ? <AiFillEye size={25} /> : <AiFillEyeInvisible size={25} />} size={"large"} />
+    </Col>
+    <Col sm={{ span: 16, offset: 4 }}>
+      <Table loading={loading} columns={tableColumns} dataSource={data} />
+    </Col>
+  </Row>)
 }
 
 const mapState = (globalState) => {
