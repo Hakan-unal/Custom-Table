@@ -39,7 +39,6 @@ const App = () => {
   };
 
   const handleGetData = () => {
-
     setData(tableColumsData)
   }
 
